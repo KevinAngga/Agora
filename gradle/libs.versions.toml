@@ -1,13 +1,35 @@
 [versions]
-agp = "8.3.1"
-kotlin = "1.9.0"
+agp = "8.3.2"
+kotlin = "1.9.23"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.4"
-activityCompose = "1.9.0"
-composeBom = "2023.08.00"
+activityCompose = "1.9.1"
+composeBom = "2024.06.00"
+hilt = "2.51.1"
+ksp = "1.9.23-1.0.20"
+timber = "5.0.1"
+retrofit = "2.11.0"
+room = "2.6.1"
+lifecycleViewmodelCompose = "2.8.2"
+navigationCompose = "2.8.0-beta05"
+hiltCompose = "1.2.0"
+firebase = "33.1.2"
+playService = "4.4.2"
+lifecycleRuntimeCompose = "2.8.4"
+paging = "3.3.1"
+ktor = "2.3.8"
+ktorClientLogging = "2.3.8"
+ktorServerCallLogging = "2.3.7"
+coil = "2.6.0"
+pallet = "1.0.0"
+glance-version = "1.1.0"
+androidHiltWork = "1.2.0"
+startupAndroid = "1.1.1"
+lottie = "6.4.0"
+composeAnimation = "1.7.0-alpha07"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -24,8 +46,60 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "androidHiltWork" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidHiltWork" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidHiltWork" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref= "retrofit"}
+retrofit-gson-converter = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler =  { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationCompose" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose"}
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "composeAnimation" }
+hilt-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltCompose"}
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref="firebase"}
+firebase-rdt = { group = "com.google.firebase", name="firebase-database" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+paging-runtime = { group = "androidx.paging", name="paging-runtime-ktx", version.ref = "paging" }
+paging-compose = { group = "androidx.paging", name="paging-compose", version.ref = "paging" }
+room-paging = { group="androidx.room", name="room-paging", version.ref="room"}
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktorServerCallLogging" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+coil = { group="io.coil-kt", name="coil-compose", version.ref="coil" }
+pallet = { group="androidx.palette", name="palette", version.ref="pallet" }
+androidx-glance = { group ="androidx.glance", name="glance", version.ref="glance-version" }
+androidx-glance-widget = { group="androidx.glance", name="glance-appwidget", version.ref="glance-version" }
+startup-android = { module = "androidx.startup:startup-runtime", version.ref = "startupAndroid" }
+lottie = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+playsService = { id ="com.google.gms.google-services", version.ref = "playService" }
+
+
+[bundles]
+ktor = [
+    "ktor-client-auth",
+    "ktor-client-cio",
+    "ktor-client-content-negotiation",
+    "ktor-client-logging",
+    "ktor-client-android",
+    "ktor-serialization-kotlinx-json"
+]
 

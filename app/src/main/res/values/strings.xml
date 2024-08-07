@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Agora</string>
+    <string name="show_password">Show Password</string>
+    <string name="hide_password">Hide Password</string>
+    <string name="hi_there">Hi there</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="agora_welcome_text">Welcome to your Agora! Find your favorite streamer here</string>
+    <string name="example_email">example@email.com</string>
+    <string name="email">Email</string>
+    <string name="must_valid_email">Must be a valid email</string>
+    <string name="password">Password</string>
+    <string name="at_least_x_character">At least %d characters</string>
+    <string name="at_least_one_number">At least one number</string>
+    <string name="contain_lowercase_char">Contain lower case character</string>
+    <string name="contain_uppercase_char">Contain upper case character</string>
+    <string name="not_have_account">Don\'t have an account?</string>
+    <string name="you_are_logged_in">You\'re logged in.</string>
+    <string name="error_email_password_incorrect">The email or password is incorrect</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_in">Sign in</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
 </resources>

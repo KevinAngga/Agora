@@ -1,4 +1,4 @@
-package com.angga.agora.ui.theme
+package com.angga.agora.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

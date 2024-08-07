@@ -1,6 +1,10 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -38,9 +42,10 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
     packaging {
         resources {
@@ -50,7 +55,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -59,6 +63,58 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+    //hilt
+    implementation(libs.dagger.hilt)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    ksp(libs.dagger.hilt.compiler)
+    ksp(libs.androidx.hilt.work)
+
+    //lottie
+    implementation(libs.lottie)
+
+    //sharedelement
+    implementation(libs.androidx.compose.animation)
+
+    //startup
+    implementation(libs.startup.android)
+
+    //ktor
+    implementation(libs.bundles.ktor)
+
+    //coil
+    implementation(libs.coil)
+
+    //pallet
+    implementation(libs.pallet)
+
+    //room
+    implementation(libs.room)
+    annotationProcessor(libs.room.runtime)
+    implementation(libs.room.runtime)
+    implementation(libs.room.paging)
+    ksp(libs.room.compiler)
+
+    //retrofit
+    implementation(libs.retrofit.gson.converter)
+    implementation(libs.retrofit)
+
+    //navigation
+    implementation(libs.navigation.compose)
+    implementation(libs.hilt.compose)
+
+    //paging
+    implementation(libs.paging.compose)
+    implementation(libs.paging.runtime)
+
+    //timber
+    implementation(libs.timber)
+
+    //firebase
+    implementation(libs.firebase.bom)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
