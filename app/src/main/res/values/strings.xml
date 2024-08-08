@@ -21,4 +21,25 @@
     <string name="sign_in">Sign in</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
+    <string name="registration_successful">Registration Successful! You can login now</string>
+
+
+    <!-- error Handle -->
+    <string name="error_disk_full">Failed to save the item because your disk is full</string>
+    <string name="error_request_timeout">Request Timeout</string>
+    <string name="error_too_many_request">You\'ve hit your limit</string>
+    <string name="error_no_internet">Couldn\'t reach server. please check you internet</string>
+    <string name="error_payload_too_large">Payload to large</string>
+    <string name="error_server">Ops, something went wrong</string>
+    <string name="error_serialization">Oops, couldn\'t parse data.</string>
+    <string name="error_unknown">An unknown error occured.</string>
+
+    <string name="firebase_error_invalid_user">The user account does not exist or has been disabled.</string>
+    <string name="firebase_invalid_credentials">The credentials provided are invalid. Please check your email and password.</string>
+    <string name="firebase_error_email_exist">An account already exists with the same email address or phone number.</string>
+    <string name="firebase_error_auth_email">There was an error related to the email address. Please check the email address and try again.</string>
+    <string name="firebase_error_auth_code_exception">The action code is invalid or expired. Please request a new action code.</string>
+    <string name="firebase_error_recent_login">This operation is sensitive and requires recent authentication. Please log in again.</string>
+    <string name="firebase_error_auth_web">There was an error related to the web operation. Please try again later.</string>
+    <string name="firebase_error_multi_factor">Multi-factor authentication is required. Please complete the additional verification steps.</string>
 </resources>

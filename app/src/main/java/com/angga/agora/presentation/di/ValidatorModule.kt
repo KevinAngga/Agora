@@ -1,8 +1,8 @@
 package com.angga.agora.presentation.di
 
-import com.angga.agora.data.EmailPatternValidator
-import com.angga.agora.domain.PatternValidator
-import com.angga.agora.domain.UserDataValidator
+import com.angga.agora.data.validation.EmailPatternValidator
+import com.angga.agora.domain.validation.PatternValidator
+import com.angga.agora.domain.validation.UserDataValidator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

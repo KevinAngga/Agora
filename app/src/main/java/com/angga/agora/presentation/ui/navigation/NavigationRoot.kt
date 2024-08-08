@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.angga.agora.presentation.ui.HomeScreenRoot
 import com.angga.agora.presentation.ui.login.LoginScreenRoot
 import com.angga.agora.presentation.ui.register.RegisterScreenRoot
 
@@ -16,9 +17,10 @@ fun NavigationRoot(
 ) {
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) "run" else Destination.Auth
+        startDestination = if (isLoggedIn) Destination.HomePage else Destination.Auth
     ) {
         authGraph(navController)
+        homeGraph(navController)
     }
 }
 
@@ -46,11 +48,15 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
         composable<Destination.Login> {
             LoginScreenRoot(
                 onLoginSuccess = {
-
+                    navController.navigate(Destination.HomePage) {
+                        popUpTo(Destination.Auth) {
+                            inclusive = true
+                        }
+                    }
                 },
                 onSignUpClick = {
                     navController.navigate(Destination.Register) {
-                        popUpTo(Destination.Register) {
+                        popUpTo(Destination.Login) {
                             inclusive = true
                             saveState = true
                         }
@@ -58,6 +64,18 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
                     }
                 }
             )
+        }
+    }
+}
+
+private fun NavGraphBuilder.homeGraph(
+    navController: NavHostController,
+) {
+    navigation<Destination.HomePage>(
+        startDestination = Destination.Home
+    ) {
+        composable<Destination.Home> {
+            HomeScreenRoot()
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.angga.agora.presentation.ui.register
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.angga.agora.domain.PasswordValidationState
+import com.angga.agora.domain.validation.PasswordValidationState
 
 data class RegisterState(
     val email : TextFieldState = TextFieldState(),

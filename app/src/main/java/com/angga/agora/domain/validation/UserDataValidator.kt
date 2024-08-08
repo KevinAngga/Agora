@@ -1,6 +1,6 @@
-package com.angga.agora.domain
+package com.angga.agora.domain.validation
 
-import com.angga.agora.data.EmailPatternValidator
+import com.angga.agora.data.validation.EmailPatternValidator
 import javax.inject.Inject
 
 class UserDataValidator @Inject constructor(val patternValidator: EmailPatternValidator) {
@@ -9,10 +9,11 @@ class UserDataValidator @Inject constructor(val patternValidator: EmailPatternVa
     }
 
     fun isValidatePassword(password : String) : PasswordValidationState {
-        val hasMinLength = password.length >= MIN_PASSWORD_LENGTH
-        val hasNumber = password.any { it.isDigit() }
-        val hasLowerCaseCharacter = password.any { it.isLowerCase() }
-        val hasUpperCaseCharacter = password.any { it.isUpperCase() }
+        val trimmedPassword = password.trim()
+        val hasMinLength = trimmedPassword.length >= MIN_PASSWORD_LENGTH
+        val hasNumber = trimmedPassword.any { it.isDigit() }
+        val hasLowerCaseCharacter = trimmedPassword.any { it.isLowerCase() }
+        val hasUpperCaseCharacter = trimmedPassword.any { it.isUpperCase() }
 
         return PasswordValidationState(
             hasMinLength = hasMinLength,

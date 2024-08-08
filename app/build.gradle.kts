@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.playsService)
 }
 
 android {
@@ -80,6 +81,13 @@ dependencies {
 
     //startup
     implementation(libs.startup.android)
+
+    //firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    //encryptedPref
+    implementation(libs.androidx.security.crypto.ktx)
 
     //ktor
     implementation(libs.bundles.ktor)

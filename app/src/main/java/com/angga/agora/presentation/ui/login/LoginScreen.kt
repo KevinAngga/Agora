@@ -1,5 +1,6 @@
 package com.angga.agora.presentation.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -33,6 +36,7 @@ import com.angga.agora.presentation.ui.components.AgoraPasswordTextField
 import com.angga.agora.presentation.ui.components.AgoraTextField
 import com.angga.agora.presentation.ui.components.EmailIcon
 import com.angga.agora.presentation.ui.theme.AgoraTheme
+import com.angga.agora.presentation.ui.utils.ObserveAsEvents
 
 
 @Composable
@@ -41,6 +45,26 @@ fun LoginScreenRoot(
     onSignUpClick: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
+
+    val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when(event) {
+            is LoginEvent.Error -> {
+                keyboardController?.hide()
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            LoginEvent.LoginSuccess -> {
+                onLoginSuccess()
+            }
+        }
+    }
+
     LoginScreen(
         state = viewModel.state,
         onAction = { action ->

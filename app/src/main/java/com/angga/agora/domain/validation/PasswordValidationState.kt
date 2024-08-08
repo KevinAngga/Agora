@@ -1,4 +1,4 @@
-package com.angga.agora.domain
+package com.angga.agora.domain.validation
 
 data class PasswordValidationState(
     val hasMinLength : Boolean = false,

@@ -1,7 +1,7 @@
-package com.angga.agora.data
+package com.angga.agora.data.validation
 
 import android.util.Patterns
-import com.angga.agora.domain.PatternValidator
+import com.angga.agora.domain.validation.PatternValidator
 import javax.inject.Inject
 
 class EmailPatternValidator @Inject constructor() : PatternValidator {

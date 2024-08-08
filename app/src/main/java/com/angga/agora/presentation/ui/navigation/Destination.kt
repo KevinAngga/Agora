@@ -11,4 +11,10 @@ sealed class Destination {
 
     @Serializable
     data object Auth
+
+    @Serializable
+    data object Home
+
+    @Serializable
+    data object HomePage
 }

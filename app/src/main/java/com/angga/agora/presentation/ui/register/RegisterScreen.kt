@@ -1,5 +1,6 @@
 package com.angga.agora.presentation.ui.register
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -31,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.angga.agora.R
-import com.angga.agora.domain.UserDataValidator
+import com.angga.agora.domain.validation.UserDataValidator
 import com.angga.agora.presentation.ui.components.AgoraActionButton
 import com.angga.agora.presentation.ui.components.AgoraPasswordTextField
 import com.angga.agora.presentation.ui.components.AgoraTextField
@@ -39,6 +42,7 @@ import com.angga.agora.presentation.ui.components.CheckIcon
 import com.angga.agora.presentation.ui.components.CrossIcon
 import com.angga.agora.presentation.ui.components.EmailIcon
 import com.angga.agora.presentation.ui.theme.AgoraTheme
+import com.angga.agora.presentation.ui.utils.ObserveAsEvents
 
 @Composable
 fun RegisterScreenRoot(
@@ -46,9 +50,45 @@ fun RegisterScreenRoot(
     onSuccessfulRegistration: () -> Unit,
     viewModel: RegisterViewModel = hiltViewModel(),
 ) {
+    //for create a toast we need a context
+    val context = LocalContext.current
+    //for hide keyboard
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+            is RegisterEvent.Error -> {
+                keyboardController?.hide()
+                Toast.makeText(
+                    context,
+                    event.error.asString(context),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            RegisterEvent.RegistrationSuccess -> {
+                Toast.makeText(
+                    context,
+                    R.string.registration_successful,
+                    Toast.LENGTH_LONG
+                ).show()
+                onSuccessfulRegistration()
+            }
+        }
+    }
+
     RegisterScreen(
         state = viewModel.state,
-        onAction = {}
+        onAction = { action ->
+            when (action) {
+                is RegisterAction.OnLoginClick -> {
+                    onSignInClick()
+                }
+
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
@@ -81,7 +121,7 @@ private fun RegisterScreen(
                     LinkAnnotation.Url(
                         url = "clickable",
                         linkInteractionListener = {
-
+                            onAction(RegisterAction.OnLoginClick)
                         },
                         styles = TextLinkStyles(
                             style = SpanStyle(
@@ -105,7 +145,11 @@ private fun RegisterScreen(
         AgoraTextField(
             state = state.email,
             startIcon = EmailIcon,
-            endIcon = null,
+            endIcon = if (state.isEmailValid) {
+                CheckIcon
+            } else {
+                null
+            },
             hint = stringResource(id = R.string.example_email),
             title = stringResource(id = R.string.email),
             modifier = Modifier.fillMaxWidth()
@@ -196,7 +240,8 @@ fun PasswordRequirement(
         Text(
             text = text,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp)
+            fontSize = 14.sp
+        )
     }
 }
 
