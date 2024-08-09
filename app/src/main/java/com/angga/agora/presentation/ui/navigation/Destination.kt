@@ -16,5 +16,18 @@ sealed class Destination {
     data object Home
 
     @Serializable
+    data object Video
+
+    @Serializable
+    data object Live
+
+    @Serializable
+    data object Chat
+
+    @Serializable
+    data object Account
+
+
+    @Serializable
     data object HomePage
 }

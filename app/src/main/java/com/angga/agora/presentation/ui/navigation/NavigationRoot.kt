@@ -7,8 +7,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.angga.agora.presentation.ui.HomeScreenRoot
+import com.angga.agora.presentation.ui.account.AccountScreenRoot
+import com.angga.agora.presentation.ui.chat.ChatScreenRoot
+import com.angga.agora.presentation.ui.live.LiveScreenRoot
 import com.angga.agora.presentation.ui.login.LoginScreenRoot
 import com.angga.agora.presentation.ui.register.RegisterScreenRoot
+import com.angga.agora.presentation.ui.video.VideoScreenRoot
 
 @Composable
 fun NavigationRoot(
@@ -76,6 +80,22 @@ private fun NavGraphBuilder.homeGraph(
     ) {
         composable<Destination.Home> {
             HomeScreenRoot()
+        }
+
+        composable<Destination.Video> {
+            VideoScreenRoot()
+        }
+
+        composable<Destination.Live> {
+            LiveScreenRoot()
+        }
+
+        composable<Destination.Chat> {
+            ChatScreenRoot()
+        }
+
+        composable<Destination.Account> {
+            AccountScreenRoot()
         }
     }
 }

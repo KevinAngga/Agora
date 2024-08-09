@@ -30,6 +30,26 @@ val LockIcon: ImageVector
     @Composable
     get() = ImageVector.vectorResource(id = R.drawable.lock)
 
+val HomeIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.home)
+
+val VideoIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.video)
+
+val CameraIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.camera)
+
+val ChatIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.chat)
+
+val AccountIcon: ImageVector
+    @Composable
+    get() = ImageVector.vectorResource(id = R.drawable.account)
+
 
 val LogoutIcon: ImageVector
     @Composable
