@@ -38,7 +38,6 @@ class LiveStreamRepositoryImpl @Inject constructor(
 
             override fun onUserOffline(uid: Int, reason: Int) {
                 super.onUserOffline(uid, reason)
-                println("==== offline "+uid)
             }
 
             override fun onClientRoleChanged(
@@ -48,7 +47,6 @@ class LiveStreamRepositoryImpl @Inject constructor(
             ) {
                 super.onClientRoleChanged(oldRole, newRole, newRoleOptions)
                 eventHandler.onClientRoleChange(newRole)
-                println("==== role "+newRole)
             }
         }
 

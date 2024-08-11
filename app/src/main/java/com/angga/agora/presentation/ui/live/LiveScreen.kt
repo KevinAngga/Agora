@@ -79,6 +79,8 @@ private fun LiveScreen(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
+
+    //update with action
     var isJoined by rememberSaveable { mutableStateOf(false) }
     var localLarge by rememberSaveable { mutableStateOf(true) }
     var localUid by rememberSaveable { mutableIntStateOf(0) }

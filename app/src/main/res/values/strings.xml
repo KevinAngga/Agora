@@ -29,6 +29,15 @@
     <string name="be_broadcaster">Be a Broadcaster</string>
     <string name="be_audience">Be a Audience</string>
 
+    <string name="empty_home_title">No live streaming now</string>
+    <string name="empty_home_subtitle">Check back later for new live</string>
+
+    <string name="empty_video_title">No video stream now</string>
+    <string name="empty_video_subtitle">Check back later for new video stream</string>
+
+    <string name="empty_chat_title">No Messages</string>
+    <string name="empty_chat_subtitle">You have no active message</string>
+
 
     <!-- error Handle -->
     <string name="error_disk_full">Failed to save the item because your disk is full</string>
