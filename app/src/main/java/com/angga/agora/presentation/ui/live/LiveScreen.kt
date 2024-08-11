@@ -26,34 +26,48 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.angga.agora.BuildConfig
 import com.angga.agora.R
+import com.angga.agora.data.AgoraLiveStreamEngine
+import com.angga.agora.domain.live.LiveStreamEngine
 import com.angga.agora.presentation.ui.components.AgoraActionButton
 import com.angga.agora.presentation.ui.components.AgoraTransparentTextField
 import com.angga.agora.presentation.ui.theme.AgoraTheme
 import io.agora.rtc2.ChannelMediaOptions
+import io.agora.rtc2.ClientRoleOptions
 import io.agora.rtc2.Constants
+import io.agora.rtc2.IRtcEngineEventHandler
 import io.agora.rtc2.RtcEngine
+import io.agora.rtc2.RtcEngineConfig
+import io.agora.rtc2.SimulcastStreamConfig
 import io.agora.rtc2.video.VideoCanvas
+import io.agora.rtc2.video.VideoEncoderConfiguration
 
 @Composable
 fun LiveScreenRoot(
     viewModel: LiveStreamViewModel = hiltViewModel(),
 ) {
-
     LiveScreen(
         state = viewModel.state,
-        rtcEngine = viewModel.rtcEngine,
+        liveStreamEngine = viewModel.liveStreamEngine,
         onAction = viewModel::onAction
     )
 }
@@ -61,11 +75,91 @@ fun LiveScreenRoot(
 @Composable
 private fun LiveScreen(
     state: LiveScreenState,
-    rtcEngine : RtcEngine? = null,
+    liveStreamEngine: LiveStreamEngine? = null,
     onAction: (LiveScreenAction) -> Unit,
 ) {
+    val liveEngine = liveStreamEngine as AgoraLiveStreamEngine
 
     val context = LocalContext.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    var isJoined by rememberSaveable { mutableStateOf(false) }
+    var localLarge by rememberSaveable { mutableStateOf(true) }
+    var channelName by rememberSaveable { mutableStateOf("") }
+    var localUid by rememberSaveable { mutableIntStateOf(0) }
+    var remoteUid by rememberSaveable { mutableIntStateOf(0) }
+    var clientRole by remember { mutableStateOf(Constants.CLIENT_ROLE_AUDIENCE) }
+
+    val rtcEngine = remember {
+        RtcEngine.create(RtcEngineConfig().apply {
+            mContext = context
+            mAppId = BuildConfig.AGORA_APP_ID
+            mEventHandler = object : IRtcEngineEventHandler() {
+                override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
+                    super.onJoinChannelSuccess(channel, uid, elapsed)
+                    isJoined = true
+                    localUid = uid
+                }
+
+                override fun onLeaveChannel(stats: RtcStats?) {
+                    super.onLeaveChannel(stats)
+                    isJoined = false
+                    localUid = 0
+                    remoteUid = 0
+                }
+
+                override fun onUserJoined(uid: Int, elapsed: Int) {
+                    super.onUserJoined(uid, elapsed)
+                    remoteUid = uid
+                }
+
+                override fun onUserOffline(uid: Int, reason: Int) {
+                    super.onUserOffline(uid, reason)
+                    if (remoteUid == uid) {
+                        remoteUid = 0
+                    }
+                }
+
+                override fun onRtcStats(stats: RtcStats?) {
+                    super.onRtcStats(stats)
+                }
+
+                override fun onLocalVideoStats(
+                    source: Constants.VideoSourceType?,
+                    stats: LocalVideoStats?,
+                ) {
+                    super.onLocalVideoStats(source, stats)
+                }
+
+
+                override fun onClientRoleChanged(
+                    oldRole: Int,
+                    newRole: Int,
+                    newRoleOptions: ClientRoleOptions?,
+                ) {
+                    super.onClientRoleChanged(oldRole, newRole, newRoleOptions)
+                    clientRole = newRole
+                }
+            }
+        }).apply {
+            setVideoEncoderConfiguration(
+                VideoEncoderConfiguration(
+                    VideoEncoderConfiguration.VD_960x540,
+                    VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_60,
+                    VideoEncoderConfiguration.STANDARD_BITRATE,
+                    VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
+                )
+            )
+            enableVideo()
+            setDualStreamMode(
+                Constants.SimulcastStreamMode.ENABLE_SIMULCAST_STREAM,
+                SimulcastStreamConfig(
+                    VideoEncoderConfiguration.VideoDimensions(
+                        100, 100
+                    ), 100, 15
+                )
+            )
+        }
+    }
 
     val permissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) { grantedMap ->
@@ -73,8 +167,6 @@ private fun LiveScreen(
             if (allGranted) {
                 // Permission is granted
                 Toast.makeText(context, "Permission Granted", Toast.LENGTH_LONG).show()
-                val mediaOptions = ChannelMediaOptions()
-                mediaOptions.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
             } else {
                 // Permission is denied
                 Toast.makeText(context, "Permission Denied", Toast.LENGTH_LONG).show()
@@ -92,7 +184,8 @@ private fun LiveScreen(
 
     DisposableEffect(LocalLifecycleOwner.current) {
         onDispose {
-            onAction(LiveScreenAction.OnLeaveClick)
+            rtcEngine.stopPreview()
+            rtcEngine.leaveChannel()
             RtcEngine.destroy()
         }
     }
@@ -106,46 +199,11 @@ private fun LiveScreen(
             modifier = Modifier.fillMaxSize()
         ) {
 
-
-
-//            AndroidView(
-//                modifier = Modifier.fillMaxSize(),
-//                factory = { context ->
-//                    TextureView(context).apply {
-//                        if (state.roleType == Constants.CLIENT_ROLE_AUDIENCE) {
-//                            rtcEngine?.setupRemoteVideo(
-//                                VideoCanvas(
-//                                    this,
-//                                    Constants.RENDER_MODE_HIDDEN,
-//                                    0
-//                                )
-//                            )
-//                        } else {
-//                            rtcEngine?.setupLocalVideo(
-//                                VideoCanvas(
-//                                    this,
-//                                    Constants.RENDER_MODE_HIDDEN,
-//                                    0
-//                                )
-//                            )
-//                        }
-//                    }
-//                },
-//                update = {
-//                    rtcEngine?.setupRemoteVideo(
-//                        VideoCanvas(
-//                            it,
-//                            Constants.RENDER_MODE_HIDDEN,
-//                            0
-//                        )
-//                    )
-//                }
-//            )
-
             TwoVideoView(
                 modifier = Modifier.fillMaxHeight(),
-                localUid = state.localUid,
-                remoteUid = state.remoteUid,
+                localUid = localUid,
+                remoteUid = remoteUid,
+                localPrimary = localLarge || remoteUid == 0,
                 localRender = { view, uid, _ ->
                     rtcEngine?.setupLocalVideo(
                         VideoCanvas(
@@ -164,7 +222,8 @@ private fun LiveScreen(
                             uid
                         )
                     )
-                }
+                },
+                role = clientRole
             )
 
             Column(
@@ -209,17 +268,32 @@ private fun LiveScreen(
                     text = stringResource(id = R.string.go_live),
                     isLoading = state.isLoading,
                     onClick = {
-                        onAction(LiveScreenAction.OnLiveClick)
+//                        onAction(LiveScreenAction.OnLiveClick)
+                        val mediaOptions = ChannelMediaOptions()
+                        mediaOptions.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
+                        rtcEngine.joinChannel(
+                            null,
+                            state.channelName.text.toString().trim(),
+                            0,
+                            mediaOptions
+                        )
                     }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 AgoraActionButton(
-                    text = "Changes",
+                    text = if (clientRole == Constants.CLIENT_ROLE_AUDIENCE)
+                        stringResource(id = R.string.be_broadcaster) else stringResource(
+                        id = R.string.be_audience
+                    ),
                     isLoading = state.isLoading,
                     onClick = {
-                        onAction(LiveScreenAction.OnChangeRole)
+                        if (clientRole == Constants.CLIENT_ROLE_AUDIENCE) {
+                            rtcEngine?.setClientRole(Constants.CLIENT_ROLE_BROADCASTER)
+                        } else {
+                            rtcEngine?.setClientRole(Constants.CLIENT_ROLE_AUDIENCE)
+                        }
                     }
                 )
             }
@@ -239,6 +313,7 @@ fun TwoVideoView(
     remoteCreate: ((context: Context) -> View)? = null,
     localRender: (View, Int, Boolean) -> Unit,
     remoteRender: (View, Int, Boolean) -> Unit,
+    role: Int,
 ) {
     val primary: @Composable (Modifier) -> Unit = {
         VideoCell(
@@ -261,13 +336,13 @@ fun TwoVideoView(
         )
     }
     Box(modifier = modifier) {
-        primary(Modifier.fillMaxSize())
-        second(
-            Modifier
-                .fillMaxSize(0.5f)
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        )
+        if (remoteUid == 0) {
+            primary(Modifier.fillMaxSize())
+        }
+
+        if (remoteUid != 0 && role == Constants.CLIENT_ROLE_AUDIENCE) {
+            second(Modifier.fillMaxSize())
+        }
     }
 }
 
@@ -278,7 +353,7 @@ fun VideoCell(
     isLocal: Boolean,
     createView: ((context: Context) -> View)? = null,
     setupVideo: (renderView: View, id: Int, isFirstSetup: Boolean) -> Unit,
-    overlay: @Composable BoxScope.() -> Unit? = { }
+    overlay: @Composable BoxScope.() -> Unit? = { },
 ) {
     Box(modifier) {
         if (id != 0) {

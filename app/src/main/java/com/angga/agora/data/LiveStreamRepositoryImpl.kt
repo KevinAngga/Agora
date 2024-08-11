@@ -2,8 +2,11 @@ package com.angga.agora.data
 
 import android.content.Context
 import com.angga.agora.BuildConfig
+import com.angga.agora.domain.live.LiveStreamEngine
+import com.angga.agora.domain.live.LiveStreamEventHandler
 import com.angga.agora.domain.live.LiveStreamRepository
 import io.agora.rtc2.ChannelMediaOptions
+import io.agora.rtc2.ClientRoleOptions
 import io.agora.rtc2.Constants
 import io.agora.rtc2.Constants.AUDIO_SCENARIO_GAME_STREAMING
 import io.agora.rtc2.IRtcEngineEventHandler
@@ -16,44 +19,67 @@ import javax.inject.Inject
 class LiveStreamRepositoryImpl @Inject constructor(
     val appContext : Context
 ) : LiveStreamRepository {
+    override fun initialize(eventHandler: LiveStreamEventHandler): LiveStreamEngine {
+        val agoraEventHandler = object : IRtcEngineEventHandler() {
+            override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
+                super.onJoinChannelSuccess(channel, uid, elapsed)
+                eventHandler.onJoinChannel(uid)
+            }
 
-    override fun initializeRtcEngine(eventHandler: IRtcEngineEventHandler): RtcEngine {
-        return RtcEngine.create(
+            override fun onUserJoined(uid: Int, elapsed: Int) {
+                super.onUserJoined(uid, elapsed)
+                eventHandler.onUserJoined(uid)
+            }
+
+            override fun onLeaveChannel(stats: RtcStats?) {
+                super.onLeaveChannel(stats)
+                eventHandler.onLeaveChannel()
+            }
+
+            override fun onUserOffline(uid: Int, reason: Int) {
+                super.onUserOffline(uid, reason)
+                println("==== offline "+uid)
+            }
+
+            override fun onClientRoleChanged(
+                oldRole: Int,
+                newRole: Int,
+                newRoleOptions: ClientRoleOptions?,
+            ) {
+                super.onClientRoleChanged(oldRole, newRole, newRoleOptions)
+                eventHandler.onClientRoleChange(newRole)
+                println("==== role "+newRole)
+            }
+        }
+
+        val rtcEngine = RtcEngine.create(
             RtcEngineConfig().apply {
                 mContext = appContext
                 mAppId = BuildConfig.AGORA_APP_ID
-                mEventHandler = eventHandler
+                mEventHandler = agoraEventHandler
             }
         )
+        return AgoraLiveStreamEngine(rtcEngine)
     }
 
-    override fun joinChannel(rtcEngine: RtcEngine, channelName: String, mediaOptions: ChannelMediaOptions) {
-        rtcEngine.joinChannel(null, channelName,0, mediaOptions)
+    override fun joinChannel(channelName : String, roleType : Int, liveStreamEngine: LiveStreamEngine) {
+        val agoraEngine = liveStreamEngine as AgoraLiveStreamEngine
+        agoraEngine.joinChannelWithName(channelName, roleType)
     }
 
-    override fun leaveChannel(rtcEngine: RtcEngine) {
-        rtcEngine.stopPreview()
-        rtcEngine.leaveChannel()
+    override fun leaveChannel(liveStreamEngine: LiveStreamEngine) {
+        liveStreamEngine.leaveChannel()
     }
 
-    override fun setVideoConfiguration(rtcEngine: RtcEngine) {
-        rtcEngine.setVideoEncoderConfiguration(
-            VideoEncoderConfiguration(
-                VideoEncoderConfiguration.VD_960x540,
-                VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_60,
-                VideoEncoderConfiguration.STANDARD_BITRATE,
-                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
-            )
-        )
-        rtcEngine.setAudioScenario(AUDIO_SCENARIO_GAME_STREAMING)
-        rtcEngine.enableVideo()
-        rtcEngine.startPreview()
-//        setDualStreamMode(rtcEngine)
-
-
+    override fun setVideoConfiguration(liveStreamEngine: LiveStreamEngine) {
+        liveStreamEngine.setConfiguration()
+        setDualStreamMode(liveStreamEngine)
     }
 
-    override fun setDualStreamMode(rtcEngine: RtcEngine) {
+    override fun setDualStreamMode(liveStreamEngine: LiveStreamEngine) {
+        val agoraEngine = liveStreamEngine as AgoraLiveStreamEngine
+        val rtcEngine = agoraEngine.getRtcEngine()
+
         rtcEngine.setDualStreamMode(
             Constants.SimulcastStreamMode.ENABLE_SIMULCAST_STREAM,
             SimulcastStreamConfig(

@@ -7,6 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.angga.agora.domain.live.LiveStreamEngine
+import com.angga.agora.domain.live.LiveStreamEventHandler
 import com.angga.agora.domain.live.LiveStreamRepository
 import com.angga.agora.presentation.ui.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,33 +37,40 @@ class LiveStreamViewModel @Inject constructor(
     private val _roleType = MutableStateFlow(savedStateHandle.toRoute<Destination.Live>().roleType)
     val roleType = _roleType.asStateFlow()
 
-    private val rtcEventHandler = object : IRtcEngineEventHandler() {
-        override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
-            super.onJoinChannelSuccess(channel, uid, elapsed)
-            viewModelScope.launch {
-                state = state.copy(
-                    isJoined = true,
-                    localUid = uid
-                )
-            }
-        }
-
-        override fun onUserJoined(uid: Int, elapsed: Int) {
-            super.onUserJoined(uid, elapsed)
+    val eventHandler = object : LiveStreamEventHandler {
+        override fun onUserJoined(userId: Int) {
             state = state.copy(
-                remoteUid = uid
+                remoteUid = userId
             )
         }
 
-        override fun onLeaveChannel(stats: RtcStats?) {
-            super.onLeaveChannel(stats)
+        override fun onJoinChannel(userId: Int) {
             state = state.copy(
-                isJoined = false
+                isJoined = true,
+                localUid = userId
             )
+        }
+
+        override fun onLeaveChannel() {
+            state = state.copy(
+                isJoined = false,
+                localUid = 0,
+                remoteUid = 0
+            )
+        }
+
+        override fun onClientRoleChange(newRole: Int) {
+            state = state.copy(
+                roleType = newRole
+            )
+        }
+
+        override fun onUserOffline(userId: Int) {
+
         }
     }
 
-    lateinit var rtcEngine: RtcEngine
+    lateinit var liveStreamEngine: LiveStreamEngine
 
     init {
         createEngine()
@@ -88,27 +97,20 @@ class LiveStreamViewModel @Inject constructor(
     }
 
     private fun leaveChannel() {
-        liveStreamRepository.leaveChannel(rtcEngine)
+        liveStreamRepository.leaveChannel(liveStreamEngine)
     }
 
     private fun joinChannel() {
-        val mediaOptions = ChannelMediaOptions().apply {
-            channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
-            clientRoleType = state.roleType
-        }
         liveStreamRepository.joinChannel(
-            rtcEngine,
             state.channelName.text.toString().trim(),
-            mediaOptions
+            state.roleType,
+            liveStreamEngine
         )
     }
 
     private fun createEngine() {
-        rtcEngine = liveStreamRepository.initializeRtcEngine(eventHandler = rtcEventHandler)
-        state = state.copy(
-            roleType = roleType.value
-        )
-        liveStreamRepository.setVideoConfiguration(rtcEngine)
+        liveStreamEngine = liveStreamRepository.initialize(eventHandler = eventHandler)
+        liveStreamRepository.setVideoConfiguration(liveStreamEngine)
     }
 
 }

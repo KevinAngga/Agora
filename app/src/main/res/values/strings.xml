@@ -25,6 +25,9 @@
     <string name="add_title_to_chat">Add a title to chat</string>
     <string name="go_live">Go LIVE</string>
 
+    <string name="be_broadcaster">Be a Broadcaster</string>
+    <string name="be_audience">Be a Audience</string>
+
 
     <!-- error Handle -->
     <string name="error_disk_full">Failed to save the item because your disk is full</string>

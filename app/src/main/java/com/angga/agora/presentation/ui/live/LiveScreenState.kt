@@ -4,11 +4,12 @@ import androidx.compose.foundation.text.input.TextFieldState
 import io.agora.rtc2.Constants
 
 data class LiveScreenState (
-    val channelName : TextFieldState = TextFieldState(),
-    val isLoading : Boolean = false,
-    val isJoined : Boolean = false,
-    val roleType : Int = Constants.CLIENT_ROLE_BROADCASTER,
-    val localUid : Int = 0,
-    val remoteUid : Int = 0
+    var channelName : TextFieldState = TextFieldState(),
+    var isLoading : Boolean = false,
+    var isJoined : Boolean = false,
+    var roleType : Int = Constants.CLIENT_ROLE_AUDIENCE,
+    var localUid : Int = 0,
+    var remoteUid : Int = 0,
+    var localLarge : Boolean = false
 
 )
