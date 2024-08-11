@@ -16,6 +16,14 @@ import io.agora.rtc2.SimulcastStreamConfig
 import io.agora.rtc2.video.VideoEncoderConfiguration
 import javax.inject.Inject
 
+/**
+ *
+ *[not testing it so it wont work] This why you will find the unused code Like LiveStreamRepositoryImpl
+ *  and other, this only for showing that we can use this way but is more complicated
+ *  and if someday we want to change the SDK it must change from Data, Domain,
+ * Presentation Layer, but if we used the current running implementation
+ * if we change the SDK it will only affected the presentation Layer
+ * **/
 class LiveStreamRepositoryImpl @Inject constructor(
     val appContext : Context
 ) : LiveStreamRepository {
