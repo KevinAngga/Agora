@@ -102,19 +102,9 @@ class MainActivity : ComponentActivity() {
                                                 drawableRes = bottomNavigation.icon,
                                                 isSelected = isSelected,
                                                 onClick = {
-                                                    println("=== ${bottomNavigation.route}")
-                                                    if (bottomNavigation.label == "") {
-                                                        println("=== true")
-                                                        navController.navigate(Destination.Live(roleType = Constants.CLIENT_ROLE_BROADCASTER)) {
-                                                            popUpTo(navController.graph.findStartDestination().id)
-                                                            launchSingleTop = true
-                                                        }
-                                                    } else {
-                                                        println("=== false")
-                                                        navController.navigate(bottomNavigation.route) {
-                                                            popUpTo(navController.graph.findStartDestination().id)
-                                                            launchSingleTop = true
-                                                        }
+                                                    navController.navigate(bottomNavigation.route) {
+                                                        popUpTo(navController.graph.findStartDestination().id)
+                                                        launchSingleTop = true
                                                     }
                                                 }
                                             )
@@ -126,15 +116,7 @@ class MainActivity : ComponentActivity() {
                 ) { _ ->
                     NavigationRoot(
                         navController = navController,
-                        isLoggedIn = viewModel.state.isLoggedIn,
-                        onJoinClick = {
-                            Destination.Live::class.qualifiedName?.let {
-                                navController.navigate(Destination.Live(roleType = Constants.CLIENT_ROLE_AUDIENCE)) {
-                                    popUpTo(navController.graph.findStartDestination().id)
-                                    launchSingleTop = true
-                                }
-                            }
-                        }
+                        isLoggedIn = viewModel.state.isLoggedIn
                     )
                 }
             }

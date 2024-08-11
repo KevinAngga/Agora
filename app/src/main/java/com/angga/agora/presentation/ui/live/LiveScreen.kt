@@ -35,8 +35,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,24 +69,18 @@ fun LiveScreenRoot(
 ) {
     LiveScreen(
         state = viewModel.state,
-        liveStreamEngine = viewModel.liveStreamEngine,
-        onAction = viewModel::onAction
     )
 }
 
 @Composable
 private fun LiveScreen(
-    state: LiveScreenState,
-    liveStreamEngine: LiveStreamEngine? = null,
-    onAction: (LiveScreenAction) -> Unit,
+    state: LiveScreenState
 ) {
-    val liveEngine = liveStreamEngine as AgoraLiveStreamEngine
-
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     var isJoined by rememberSaveable { mutableStateOf(false) }
     var localLarge by rememberSaveable { mutableStateOf(true) }
-    var channelName by rememberSaveable { mutableStateOf("") }
     var localUid by rememberSaveable { mutableIntStateOf(0) }
     var remoteUid by rememberSaveable { mutableIntStateOf(0) }
     var clientRole by remember { mutableStateOf(Constants.CLIENT_ROLE_AUDIENCE) }
@@ -166,7 +162,7 @@ private fun LiveScreen(
             val allGranted = grantedMap.values.all { it }
             if (allGranted) {
                 // Permission is granted
-                Toast.makeText(context, "Permission Granted", Toast.LENGTH_LONG).show()
+                rtcEngine.startPreview()
             } else {
                 // Permission is denied
                 Toast.makeText(context, "Permission Denied", Toast.LENGTH_LONG).show()
@@ -240,23 +236,6 @@ private fun LiveScreen(
                     hint = stringResource(id = R.string.add_title_to_chat)
                 )
             }
-//
-//            if (!state.isJoined) {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .align(Alignment.BottomStart)
-//                        .padding(horizontal = 32.dp, vertical = 16.dp)
-//                ) {
-//                    AgoraActionButton(
-//                        text = stringResource(id = R.string.go_live),
-//                        isLoading = state.isLoading,
-//                        onClick = {
-//                            onAction(LiveScreenAction.OnLiveClick)
-//                        }
-//                    )
-//                }
-//            }
 
             Column(
                 modifier = Modifier
@@ -265,18 +244,24 @@ private fun LiveScreen(
                     .padding(horizontal = 32.dp, vertical = 16.dp)
             ) {
                 AgoraActionButton(
-                    text = stringResource(id = R.string.go_live),
-                    isLoading = state.isLoading,
+                    text = if (isJoined) stringResource(id = R.string.leave) else stringResource(id = R.string.go_live),
+                    isLoading = false,
                     onClick = {
-//                        onAction(LiveScreenAction.OnLiveClick)
-                        val mediaOptions = ChannelMediaOptions()
-                        mediaOptions.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
-                        rtcEngine.joinChannel(
-                            null,
-                            state.channelName.text.toString().trim(),
-                            0,
-                            mediaOptions
-                        )
+                        keyboard?.hide()
+                        focusManager.clearFocus()
+                        if (isJoined) {
+                            rtcEngine.stopPreview()
+                            rtcEngine.leaveChannel()
+                        } else {
+                            val mediaOptions = ChannelMediaOptions()
+                            mediaOptions.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
+                            rtcEngine.joinChannel(
+                                null,
+                                state.channelName.text.toString().trim(),
+                                0,
+                                mediaOptions
+                            )
+                        }
                     }
                 )
 
@@ -287,7 +272,8 @@ private fun LiveScreen(
                         stringResource(id = R.string.be_broadcaster) else stringResource(
                         id = R.string.be_audience
                     ),
-                    isLoading = state.isLoading,
+                    enabled = isJoined,
+                    isLoading = false,
                     onClick = {
                         if (clientRole == Constants.CLIENT_ROLE_AUDIENCE) {
                             rtcEngine?.setClientRole(Constants.CLIENT_ROLE_BROADCASTER)
@@ -382,7 +368,6 @@ private fun LiveScreenPreview() {
     AgoraTheme {
         LiveScreen(
             state = LiveScreenState(),
-            onAction = {}
         )
     }
 }

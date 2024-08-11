@@ -20,9 +20,7 @@ sealed class Destination {
     data object Video
 
     @Serializable
-    data class Live(
-        var roleType : Int = Constants.CLIENT_ROLE_AUDIENCE
-    )
+    data object Live
 
     @Serializable
     data object Chat

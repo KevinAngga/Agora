@@ -18,15 +18,14 @@ import com.angga.agora.presentation.ui.video.VideoScreenRoot
 @Composable
 fun NavigationRoot(
     navController: NavHostController,
-    isLoggedIn: Boolean,
-    onJoinClick : () -> Unit
+    isLoggedIn: Boolean
 ) {
     NavHost(
         navController = navController,
         startDestination = if (isLoggedIn) Destination.HomePage else Destination.Auth
     ) {
         authGraph(navController)
-        homeGraph(navController, onJoinClick)
+        homeGraph(navController)
     }
 }
 
@@ -75,15 +74,14 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
 }
 
 private fun NavGraphBuilder.homeGraph(
-    navController: NavHostController,
-    onJoinClick : () -> Unit
+    navController: NavHostController
 ) {
     navigation<Destination.HomePage>(
         startDestination = Destination.Home
     ) {
         composable<Destination.Home> {
             HomeScreenRoot(
-                onJoinClick = { onJoinClick() }
+
             )
         }
 

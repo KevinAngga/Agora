@@ -7,26 +7,18 @@ import com.angga.agora.presentation.ui.theme.AgoraTheme
 
 @Composable
 fun HomeScreenRoot(
-    onJoinClick : () -> Unit
+
 ) {
     HomeScreen(
-        onJoinClick = {
-            onJoinClick()
-        }
+
     )
 }
 
 @Composable
 private fun HomeScreen(
-    onJoinClick : () -> Unit
+
 ) {
-    AgoraActionButton(
-        text = "Join",
-        isLoading = false,
-        onClick = {
-            onJoinClick()
-        }
-    )
+
 }
 
 @Preview
@@ -34,7 +26,6 @@ private fun HomeScreen(
 private fun HomeScreenPreview() {
     AgoraTheme {
         HomeScreen(
-            onJoinClick = {}
         )
     }
 }

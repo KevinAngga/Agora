@@ -24,6 +24,7 @@
     <string name="registration_successful">Registration Successful! You can login now</string>
     <string name="add_title_to_chat">Add a title to chat</string>
     <string name="go_live">Go LIVE</string>
+    <string name="leave">Leave</string>
 
     <string name="be_broadcaster">Be a Broadcaster</string>
     <string name="be_audience">Be a Audience</string>
