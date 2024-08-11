@@ -98,7 +98,15 @@ private fun NavGraphBuilder.homeGraph(
         }
 
         composable<Destination.Account> {
-            AccountScreenRoot()
+            AccountScreenRoot(
+                onLogoutClick = {
+                    navController.navigate(Destination.Auth) {
+                        popUpTo(Destination.HomePage) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }

@@ -9,35 +9,50 @@ import androidx.compose.ui.unit.sp
 import com.angga.agora.R
 
 // Set of Material typography styles to start with
-val InGlobal = FontFamily(
+val Poppins = FontFamily(
     Font(
-        resId = R.font.inglobal,
+        resId = R.font.poppins_light,
+        weight = FontWeight.Light
+    ),
+
+    Font(
+        resId = R.font.poppins_regular,
         weight = FontWeight.Normal
     ),
 
     Font(
-        resId = R.font.inglobal_bold,
+        resId = R.font.poppins_medium,
+        weight = FontWeight.Medium
+    ),
+
+    Font(
+        resId = R.font.poppins_semibold,
+        weight = FontWeight.SemiBold
+    ),
+
+    Font(
+        resId = R.font.poppins_bold,
         weight = FontWeight.Bold
-    )
+    ),
 )
 
 val Typography = Typography(
     bodySmall = TextStyle(
-        fontFamily = InGlobal,
+        fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 20.sp,
     ),
 
     bodyMedium = TextStyle(
-        fontFamily = InGlobal,
+        fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 22.sp,
     ),
 
     bodyLarge = TextStyle(
-        fontFamily = InGlobal,
+        fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
@@ -45,14 +60,14 @@ val Typography = Typography(
     ),
 
     labelLarge = TextStyle(
-        fontFamily = InGlobal,
+        fontFamily = Poppins,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 24.sp,
     ),
 
     headlineMedium = TextStyle(
-        fontFamily = InGlobal,
+        fontFamily = Poppins,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
     ),

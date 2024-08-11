@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -47,77 +48,81 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        installSplashScreen().apply {
+            setKeepOnScreenCondition {
+                viewModel.state.isCheckingAuth
+            }
+        }
+
         setContent {
             AgoraTheme {
-                val navController = rememberNavController()
+                if (!viewModel.state.isCheckingAuth) {
+                    val navController = rememberNavController()
 
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-                    ?: BottomNavigation.HOME::class.qualifiedName.orEmpty()
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = navBackStackEntry?.destination?.route
+                        ?: BottomNavigation.HOME::class.qualifiedName.orEmpty()
 
-                val isBottomAppBarVisible = rememberSaveable(navBackStackEntry) {
-                    navBackStackEntry?.destination?.route == Destination.Home::class.qualifiedName ||
-                            navBackStackEntry?.destination?.route == Destination.Video::class.qualifiedName ||
-                            navBackStackEntry?.destination?.route == Destination.Chat::class.qualifiedName ||
-                    navBackStackEntry?.destination?.route == Destination.Account::class.qualifiedName
-                }
+                    val isBottomAppBarVisible = rememberSaveable(navBackStackEntry) {
+                        navBackStackEntry?.destination?.route == Destination.Home::class.qualifiedName ||
+                                navBackStackEntry?.destination?.route == Destination.Video::class.qualifiedName ||
+                                navBackStackEntry?.destination?.route == Destination.Chat::class.qualifiedName ||
+                                navBackStackEntry?.destination?.route == Destination.Account::class.qualifiedName
+                    }
 
-                val isLiveSelected = rememberSaveable(navBackStackEntry) {
-                    navBackStackEntry?.destination?.route == Destination.Live::class.qualifiedName
-                }
-
-
-                Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding(),
-                    bottomBar = {
-                        if (isBottomAppBarVisible) {
-                            NavigationBar(
-                                modifier = Modifier
-                                    .padding(24.dp)
-                                    .background(MaterialTheme.colorScheme.background, CircleShape),
-                                containerColor = Color.Transparent
-                            ) {
-                                Row(
+                    Scaffold(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .navigationBarsPadding(),
+                        bottomBar = {
+                            if (isBottomAppBarVisible) {
+                                NavigationBar(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(4.dp)
-                                        .clip(RoundedCornerShape(34.dp)),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                        .padding(24.dp)
+                                        .background(MaterialTheme.colorScheme.background, CircleShape),
+                                    containerColor = Color.Transparent
                                 ) {
-                                    BottomNavigation.entries
-                                        .forEachIndexed { index, bottomNavigation ->
-                                            val isSelected by remember(currentRoute) {
-                                                derivedStateOf {
-                                                    currentRoute == bottomNavigation.route::class.qualifiedName
-                                                }
-                                            }
-                                            AgoraMenuItem(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .align(Alignment.CenterVertically),
-                                                label = bottomNavigation.label,
-                                                drawableRes = bottomNavigation.icon,
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    navController.navigate(bottomNavigation.route) {
-                                                        popUpTo(navController.graph.findStartDestination().id)
-                                                        launchSingleTop = true
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(4.dp)
+                                            .clip(RoundedCornerShape(34.dp)),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        BottomNavigation.entries
+                                            .forEachIndexed { index, bottomNavigation ->
+                                                val isSelected by remember(currentRoute) {
+                                                    derivedStateOf {
+                                                        currentRoute == bottomNavigation.route::class.qualifiedName
                                                     }
                                                 }
-                                            )
-                                        }
+                                                AgoraMenuItem(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .align(Alignment.CenterVertically),
+                                                    label = bottomNavigation.label,
+                                                    drawableRes = bottomNavigation.icon,
+                                                    isSelected = isSelected,
+                                                    onClick = {
+                                                        navController.navigate(bottomNavigation.route) {
+                                                            popUpTo(navController.graph.findStartDestination().id)
+                                                            launchSingleTop = true
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                    }
                                 }
                             }
                         }
+                    ) { _ ->
+                        NavigationRoot(
+                            navController = navController,
+                            isLoggedIn = viewModel.state.isLoggedIn
+                        )
                     }
-                ) { _ ->
-                    NavigationRoot(
-                        navController = navController,
-                        isLoggedIn = viewModel.state.isLoggedIn
-                    )
                 }
             }
         }

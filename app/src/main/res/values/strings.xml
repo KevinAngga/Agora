@@ -20,6 +20,7 @@
     <string name="sign_up">Sign up</string>
     <string name="sign_in">Sign in</string>
     <string name="login">Login</string>
+    <string name="logout">Logout</string>
     <string name="register">Register</string>
     <string name="registration_successful">Registration Successful! You can login now</string>
     <string name="add_title_to_chat">Add a title to chat</string>

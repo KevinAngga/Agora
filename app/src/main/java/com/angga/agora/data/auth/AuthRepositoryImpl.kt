@@ -28,6 +28,8 @@ class AuthRepositoryImpl @Inject constructor(
             Result.Success(data = response)
         } catch (e : FirebaseAuthException) {
             Result.Failed(handleFirebaseAuthException(firebaseAuthException = e))
+        } catch (e : Exception) {
+            Result.Failed(DataError.FirebaseError.UNKNOWN)
         }
     }
 
@@ -37,6 +39,8 @@ class AuthRepositoryImpl @Inject constructor(
             Result.Success(data = response)
         } catch (e : FirebaseAuthException) {
             Result.Failed(handleFirebaseAuthException(firebaseAuthException = e))
+        } catch (e : Exception) {
+            Result.Failed(DataError.FirebaseError.UNKNOWN)
         }
     }
 

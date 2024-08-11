@@ -69,23 +69,18 @@ fun LiveScreenRoot(
 ) {
     LiveScreen(
         state = viewModel.state,
+        onAction = viewModel::onAction
     )
 }
 
 @Composable
 private fun LiveScreen(
-    state: LiveScreenState
+    state: LiveScreenState,
+    onAction: (LiveScreenAction) -> Unit,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
-
-    //update with action
-    var isJoined by rememberSaveable { mutableStateOf(false) }
-    var localLarge by rememberSaveable { mutableStateOf(true) }
-    var localUid by rememberSaveable { mutableIntStateOf(0) }
-    var remoteUid by rememberSaveable { mutableIntStateOf(0) }
-    var clientRole by remember { mutableStateOf(Constants.CLIENT_ROLE_AUDIENCE) }
 
     val rtcEngine = remember {
         RtcEngine.create(RtcEngineConfig().apply {
@@ -94,40 +89,25 @@ private fun LiveScreen(
             mEventHandler = object : IRtcEngineEventHandler() {
                 override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
                     super.onJoinChannelSuccess(channel, uid, elapsed)
-                    isJoined = true
-                    localUid = uid
+                    onAction(LiveScreenAction.OnJoinChannel(true))
+                    onAction(LiveScreenAction.LocalUidChange(uid))
                 }
 
                 override fun onLeaveChannel(stats: RtcStats?) {
                     super.onLeaveChannel(stats)
-                    isJoined = false
-                    localUid = 0
-                    remoteUid = 0
+                    onAction(LiveScreenAction.OnJoinChannel(false))
+                    onAction(LiveScreenAction.OnLeaveClick(localUid = 0, remoteUid = 0))
                 }
 
                 override fun onUserJoined(uid: Int, elapsed: Int) {
                     super.onUserJoined(uid, elapsed)
-                    remoteUid = uid
+                    onAction(LiveScreenAction.RemoteUidChange(uid))
                 }
 
                 override fun onUserOffline(uid: Int, reason: Int) {
                     super.onUserOffline(uid, reason)
-                    if (remoteUid == uid) {
-                        remoteUid = 0
-                    }
+                    onAction(LiveScreenAction.RemoteUidChange(0))
                 }
-
-                override fun onRtcStats(stats: RtcStats?) {
-                    super.onRtcStats(stats)
-                }
-
-                override fun onLocalVideoStats(
-                    source: Constants.VideoSourceType?,
-                    stats: LocalVideoStats?,
-                ) {
-                    super.onLocalVideoStats(source, stats)
-                }
-
 
                 override fun onClientRoleChanged(
                     oldRole: Int,
@@ -135,7 +115,7 @@ private fun LiveScreen(
                     newRoleOptions: ClientRoleOptions?,
                 ) {
                     super.onClientRoleChanged(oldRole, newRole, newRoleOptions)
-                    clientRole = newRole
+                    onAction(LiveScreenAction.OnChangeClientRole(newRole))
                 }
             }
         }).apply {
@@ -144,7 +124,7 @@ private fun LiveScreen(
                     VideoEncoderConfiguration.VD_960x540,
                     VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_60,
                     VideoEncoderConfiguration.STANDARD_BITRATE,
-                    VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
+                    VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT
                 )
             )
             enableVideo()
@@ -199,9 +179,9 @@ private fun LiveScreen(
 
             TwoVideoView(
                 modifier = Modifier.fillMaxHeight(),
-                localUid = localUid,
-                remoteUid = remoteUid,
-                localPrimary = localLarge || remoteUid == 0,
+                localUid = state.localUid,
+                remoteUid = state.remoteUid,
+                localPrimary = state.localLarge || state.remoteUid == 0,
                 localRender = { view, uid, _ ->
                     rtcEngine?.setupLocalVideo(
                         VideoCanvas(
@@ -221,7 +201,7 @@ private fun LiveScreen(
                         )
                     )
                 },
-                role = clientRole
+                role = state.clientRole
             )
 
             Column(
@@ -246,17 +226,21 @@ private fun LiveScreen(
                     .padding(horizontal = 32.dp, vertical = 16.dp)
             ) {
                 AgoraActionButton(
-                    text = if (isJoined) stringResource(id = R.string.leave) else stringResource(id = R.string.go_live),
+                    text = if (state.isJoined) stringResource(id = R.string.leave) else stringResource(
+                        id = R.string.go_live
+                    ),
                     isLoading = false,
+                    enabled = state.channelName.text.toString().trim().isNotEmpty(),
                     onClick = {
                         keyboard?.hide()
                         focusManager.clearFocus()
-                        if (isJoined) {
+                        if (state.isJoined) {
                             rtcEngine.stopPreview()
                             rtcEngine.leaveChannel()
                         } else {
                             val mediaOptions = ChannelMediaOptions()
-                            mediaOptions.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
+                            mediaOptions.channelProfile =
+                                Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
                             rtcEngine.joinChannel(
                                 null,
                                 state.channelName.text.toString().trim(),
@@ -270,14 +254,14 @@ private fun LiveScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 AgoraActionButton(
-                    text = if (clientRole == Constants.CLIENT_ROLE_AUDIENCE)
+                    text = if (state.clientRole == Constants.CLIENT_ROLE_AUDIENCE)
                         stringResource(id = R.string.be_broadcaster) else stringResource(
                         id = R.string.be_audience
                     ),
-                    enabled = isJoined,
+                    enabled = state.isJoined,
                     isLoading = false,
                     onClick = {
-                        if (clientRole == Constants.CLIENT_ROLE_AUDIENCE) {
+                        if (state.clientRole == Constants.CLIENT_ROLE_AUDIENCE) {
                             rtcEngine?.setClientRole(Constants.CLIENT_ROLE_BROADCASTER)
                         } else {
                             rtcEngine?.setClientRole(Constants.CLIENT_ROLE_AUDIENCE)
@@ -324,10 +308,7 @@ fun TwoVideoView(
         )
     }
     Box(modifier = modifier) {
-        if (remoteUid == 0) {
-            primary(Modifier.fillMaxSize())
-        }
-
+        primary(Modifier.fillMaxSize())
         if (remoteUid != 0 && role == Constants.CLIENT_ROLE_AUDIENCE) {
             second(Modifier.fillMaxSize())
         }
@@ -370,6 +351,7 @@ private fun LiveScreenPreview() {
     AgoraTheme {
         LiveScreen(
             state = LiveScreenState(),
+            onAction = {}
         )
     }
 }
