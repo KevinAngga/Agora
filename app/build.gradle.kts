@@ -1,3 +1,6 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -20,6 +23,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties()
+        properties.load(rootProject.file("local.properties").inputStream())
+
+        val AGORA_APP_ID = properties.getProperty("AGORA_APP_ID", "")
+        if (AGORA_APP_ID == "") {
+            throw GradleException("Please input APP ID on local.properties")
+        }
+        val AGORA_APP_CERT = properties.getProperty("AGORA_APP_CERT", "")
+        buildConfigField("String", "AGORA_APP_ID", "\"$AGORA_APP_ID\"")
+        buildConfigField("String", "AGORA_APP_CERT", "\"$AGORA_APP_CERT\"")
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -34,6 +49,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -122,6 +138,9 @@ dependencies {
 
     //firebase
     implementation(libs.firebase.bom)
+
+    //agora
+    implementation(libs.agora.full.sdk)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

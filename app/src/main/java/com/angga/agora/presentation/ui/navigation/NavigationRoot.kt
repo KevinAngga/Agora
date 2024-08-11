@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import com.angga.agora.presentation.ui.HomeScreenRoot
 import com.angga.agora.presentation.ui.account.AccountScreenRoot
 import com.angga.agora.presentation.ui.chat.ChatScreenRoot
@@ -18,13 +19,14 @@ import com.angga.agora.presentation.ui.video.VideoScreenRoot
 fun NavigationRoot(
     navController: NavHostController,
     isLoggedIn: Boolean,
+    onJoinClick : () -> Unit
 ) {
     NavHost(
         navController = navController,
         startDestination = if (isLoggedIn) Destination.HomePage else Destination.Auth
     ) {
         authGraph(navController)
-        homeGraph(navController)
+        homeGraph(navController, onJoinClick)
     }
 }
 
@@ -74,12 +76,15 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
 
 private fun NavGraphBuilder.homeGraph(
     navController: NavHostController,
+    onJoinClick : () -> Unit
 ) {
     navigation<Destination.HomePage>(
         startDestination = Destination.Home
     ) {
         composable<Destination.Home> {
-            HomeScreenRoot()
+            HomeScreenRoot(
+                onJoinClick = { onJoinClick() }
+            )
         }
 
         composable<Destination.Video> {

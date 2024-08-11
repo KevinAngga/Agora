@@ -35,7 +35,9 @@ import com.angga.agora.presentation.ui.navigation.BottomNavigation
 import com.angga.agora.presentation.ui.navigation.Destination
 import com.angga.agora.presentation.ui.navigation.NavigationRoot
 import com.angga.agora.presentation.ui.theme.AgoraTheme
+import com.angga.agora.presentation.ui.utils.Constant
 import dagger.hilt.android.AndroidEntryPoint
+import io.agora.rtc2.Constants
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -58,6 +60,10 @@ class MainActivity : ComponentActivity() {
                             navBackStackEntry?.destination?.route == Destination.Video::class.qualifiedName ||
                             navBackStackEntry?.destination?.route == Destination.Chat::class.qualifiedName ||
                     navBackStackEntry?.destination?.route == Destination.Account::class.qualifiedName
+                }
+
+                val isLiveSelected = rememberSaveable(navBackStackEntry) {
+                    navBackStackEntry?.destination?.route == Destination.Live::class.qualifiedName
                 }
 
 
@@ -96,9 +102,19 @@ class MainActivity : ComponentActivity() {
                                                 drawableRes = bottomNavigation.icon,
                                                 isSelected = isSelected,
                                                 onClick = {
-                                                    navController.navigate(bottomNavigation.route) {
-                                                        popUpTo(navController.graph.findStartDestination().id)
-                                                        launchSingleTop = true
+                                                    println("=== ${bottomNavigation.route}")
+                                                    if (bottomNavigation.label == "") {
+                                                        println("=== true")
+                                                        navController.navigate(Destination.Live(roleType = Constants.CLIENT_ROLE_BROADCASTER)) {
+                                                            popUpTo(navController.graph.findStartDestination().id)
+                                                            launchSingleTop = true
+                                                        }
+                                                    } else {
+                                                        println("=== false")
+                                                        navController.navigate(bottomNavigation.route) {
+                                                            popUpTo(navController.graph.findStartDestination().id)
+                                                            launchSingleTop = true
+                                                        }
                                                     }
                                                 }
                                             )
@@ -110,7 +126,15 @@ class MainActivity : ComponentActivity() {
                 ) { _ ->
                     NavigationRoot(
                         navController = navController,
-                        isLoggedIn = viewModel.state.isLoggedIn
+                        isLoggedIn = viewModel.state.isLoggedIn,
+                        onJoinClick = {
+                            Destination.Live::class.qualifiedName?.let {
+                                navController.navigate(Destination.Live(roleType = Constants.CLIENT_ROLE_AUDIENCE)) {
+                                    popUpTo(navController.graph.findStartDestination().id)
+                                    launchSingleTop = true
+                                }
+                            }
+                        }
                     )
                 }
             }

@@ -22,6 +22,8 @@
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="registration_successful">Registration Successful! You can login now</string>
+    <string name="add_title_to_chat">Add a title to chat</string>
+    <string name="go_live">Go LIVE</string>
 
 
     <!-- error Handle -->

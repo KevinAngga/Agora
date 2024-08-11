@@ -1,5 +1,6 @@
 package com.angga.agora.presentation.ui.navigation
 
+import io.agora.rtc2.Constants
 import kotlinx.serialization.Serializable
 
 sealed class Destination {
@@ -19,7 +20,9 @@ sealed class Destination {
     data object Video
 
     @Serializable
-    data object Live
+    data class Live(
+        var roleType : Int = Constants.CLIENT_ROLE_AUDIENCE
+    )
 
     @Serializable
     data object Chat

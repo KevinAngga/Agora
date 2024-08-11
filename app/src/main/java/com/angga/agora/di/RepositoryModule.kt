@@ -1,12 +1,16 @@
 package com.angga.agora.di
 
+import android.content.Context
+import com.angga.agora.data.LiveStreamRepositoryImpl
 import com.angga.agora.data.auth.AuthRepositoryImpl
 import com.angga.agora.domain.auth.AuthRepository
+import com.angga.agora.domain.live.LiveStreamRepository
 import com.angga.agora.domain.session.SessionStorage
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -23,6 +27,17 @@ object RepositoryModule {
         return AuthRepositoryImpl(
             firebaseAuth = auth,
             sessionStorage = sessionStorage
+        )
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideLiveStreamRepository(
+        @ApplicationContext context: Context
+    ) : LiveStreamRepository {
+        return LiveStreamRepositoryImpl(
+            appContext = context
         )
     }
 }

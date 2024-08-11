@@ -13,6 +13,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.agora.rtc2.RtcEngine
+import io.agora.rtc2.RtcEngineConfig
 import javax.inject.Singleton
 
 @Module
@@ -46,6 +48,16 @@ object AppModule {
         sharedPreferences: SharedPreferences
     ) : SessionStorage {
         return EncryptedSessionStorage(sharedPreferences)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRctEngine(@ApplicationContext context: Context) : RtcEngine {
+        return RtcEngine.create(
+            RtcEngineConfig().apply {
+                mContext = context
+            }
+        )
     }
 
 }
